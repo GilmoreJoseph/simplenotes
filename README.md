@@ -20,6 +20,7 @@ Notes simply have the date in the format Jan 02, 2006, a newline, and tags (any 
 
 To search notes use a GET request with query string parameters. The following are accepted.
 
+
 start - Inclusive (Format Jan 02, 2006)
 
 end - Inclusive (Formet Jan 02, 2006)
