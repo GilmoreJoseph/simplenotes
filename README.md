@@ -28,6 +28,14 @@ tag - Tag that note has, to search multiple add multiple &tag= to query
 
 phrase - Exact phrase to be searched, can only include one.
 
+# ios shortcut
+
+https://www.icloud.com/shortcuts/5b401efd2a0e4afea092e792bd14f913
+
+Replace the URL, the first action in the shorcut with the url of your server and make sure you include the note file you want at the end.
+
+The shortcut supports writing and getting notes. Getting notes only works with tags, and dates. No phrases yet.
+
 # future plans
 
 -authorization

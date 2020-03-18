@@ -1,14 +1,16 @@
 package main
 
 import (
+		"os"
     "log"
     "net/http"
     "net/url"
-		"io/ioutil"
-    "fmt"
     "encoding/json"
     "time"
 )
+
+//Global
+var logger *log.Logger
 
 //Message is just used to decode the json in put request
 type Message struct {
@@ -55,7 +57,7 @@ func handleQuery(fileName string, q url.Values) (*[]string, error) {
         }
     } else if (query.Start != "") {
         s, err := time.Parse("Jan 2, 2006", query.Start)
-        err = FilterDates(s, time.Unix(1<<63-62135596801, 999999999), notes)
+        err = FilterDates(s, time.Unix(1<<63-62135596801, 999999999), notes) //max date
         if (err != nil){
             return nil, err
         }
@@ -93,7 +95,11 @@ func handleQuery(fileName string, q url.Values) (*[]string, error) {
 func notesHandler(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "application/json")
+
+		//take file from end of url
 		noteFile := r.URL.Path[len("/notes/"):]
+
+		logger.Println("Request -- RemoteAddr: " + r.RemoteAddr + " Method: " + r.Method + " Host: " + r.Host)
 
     switch r.Method {
         case "GET":
@@ -102,6 +108,7 @@ func notesHandler(w http.ResponseWriter, r *http.Request) {
 				        w.WriteHeader(http.StatusInternalServerError)
                 w.Write([]byte(`{"Error": "Could not read. Could be your fault, could be my fault"}`))
             } else {
+								logger.Println("Reponded with " + string(len(*notes)) + " notes.")
                 json.NewEncoder(w).Encode(*notes)
                 w.WriteHeader(http.StatusOK)
             }
@@ -119,7 +126,7 @@ func notesHandler(w http.ResponseWriter, r *http.Request) {
 				            w.WriteHeader(http.StatusInternalServerError)
                     w.Write([]byte(`{"Error": "Could not write to file"}`))
                 }
-                fmt.Println("wrote note: " + mes.Note)
+                logger.Println("wrote note: " + mes.Note)
                 w.WriteHeader(http.StatusOK)
             }
 
@@ -131,6 +138,15 @@ func notesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+		f, err := os.OpenFile("text.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Println(err)
+		}
+		defer f.Close()
+
+		logger = log.New(f, "Server", log.LstdFlags)
 
     //home page is just simple html file (index.html)
     fs := http.FileServer(http.Dir("./static"))
